@@ -1,0 +1,3 @@
+This fix is bad and lead to segfault.
+
+g_free must be used instead of g_unref_object
