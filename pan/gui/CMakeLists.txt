@@ -38,7 +38,8 @@ set(SRC_C_FILES
 )
 
 # https://cmake.org/cmake/help/latest/command/add_library.html
-add_library(pan-cc-gui STATIC ${SRC_CC_FILES})
+add_library(pan-cc-gui STATIC ${SRC_CC_FILES} ${PAN_ICONS_RESOURCE_SOURCE})
+add_dependencies(pan-cc-gui pan-icons-resource)
 
 add_library(pan-c-gui STATIC ${SRC_C_FILES})
 

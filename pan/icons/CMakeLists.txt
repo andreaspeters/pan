@@ -1,6 +1,32 @@
 
 file(GLOB public_icons hicolor_apps_*.pan.png)
 
+# Embed all Pan PNG icons so the application does not depend on its working
+# directory or on the separately installed icon files at runtime.
+file(GLOB icon_resources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.png")
+set(icon_resource_manifest "${CMAKE_CURRENT_BINARY_DIR}/pan-icons.gresource.xml")
+file(WRITE "${icon_resource_manifest}"
+  "<gresources>\n  <gresource prefix=\"/org/gnome/pan/icons\">\n")
+foreach(icon_file IN LISTS icon_resources)
+  cmake_path(GET icon_file FILENAME icon_name)
+  file(APPEND "${icon_resource_manifest}" "    <file>${icon_name}</file>\n")
+endforeach()
+file(APPEND "${icon_resource_manifest}" "  </gresource>\n</gresources>\n")
+
+find_program(GLIB_COMPILE_RESOURCES glib-compile-resources REQUIRED)
+set(PAN_ICONS_RESOURCE_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/pan-icons-resource.c")
+set(PAN_ICONS_RESOURCE_SOURCE "${PAN_ICONS_RESOURCE_SOURCE}" PARENT_SCOPE)
+add_custom_command(
+  OUTPUT "${PAN_ICONS_RESOURCE_SOURCE}"
+  COMMAND "${GLIB_COMPILE_RESOURCES}" "${icon_resource_manifest}"
+          --sourcedir "${CMAKE_CURRENT_SOURCE_DIR}"
+          --generate-source --manual-register --c-name pan_icons
+          --target "${PAN_ICONS_RESOURCE_SOURCE}"
+  DEPENDS "${icon_resource_manifest}" ${icon_resources}
+  VERBATIM
+)
+add_custom_target(pan-icons-resource DEPENDS "${PAN_ICONS_RESOURCE_SOURCE}")
+
 # keep .png otherwise dependency check fails
 list(APPEND stock_images
 	icon_article_read.png
