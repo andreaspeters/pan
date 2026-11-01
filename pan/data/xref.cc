@@ -33,11 +33,12 @@ Xref :: insert (const Quark             & server,
 {
   pan_return_if_fail (!server.empty());
 
-  // trim & cleanup; remove leading "Xref: " if present
+  // Trim and remove the Xref field name, allowing optional whitespace after
+  // the colon (as in Synchronet's historical XOVER output).
   StringView xref (line);
   xref.trim ();
-  if (xref.len>6 && !memcmp(xref.str,"Xref: ",6)) {
-    xref = xref.substr (xref.str+6, NULL);
+  if (xref.len>=5 && !g_ascii_strncasecmp(xref.str,"Xref:",5)) {
+    xref = xref.substr (xref.str+5, NULL);
     xref.trim ();
   }
 
